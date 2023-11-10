@@ -1,2 +1,2 @@
 # DDOS
-ddos amplification technique atumation tool
+Script to perform ddos amplification attacks.
