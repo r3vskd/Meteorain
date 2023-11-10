@@ -13,8 +13,7 @@ Yes, mitigation options are limited due to the high amount of traffic generated,
 - Amplification Factor: DNS amplification attacks leverage the amplification effect of DNS responses to magnify the volume of traffic directed at the target.
 - Mitigation Techniques: Mitigating a DNS amplification attack may involve implementing measures such as rate limiting on DNS servers, using DNS response validation,
   and securing open DNS resolvers. Mitigating general DDoS attacks might involve deploying DDoS protection services, firewalls, and load balancers.
-
-|==============================================|
+  
 # References:
 - https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/
 - https://blog.cloudflare.com/reflections-on-reflections/
