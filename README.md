@@ -15,7 +15,7 @@ Yes, mitigation options are limited due to the high amount of traffic generated,
   and securing open DNS resolvers. Mitigating general DDoS attacks might involve deploying DDoS protection services, firewalls, and load balancers.
 
 |==============================================|
-# REFERENCES:
+# References:
 - https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/
 - https://blog.cloudflare.com/reflections-on-reflections/
 - https://www.imperva.com/learn/ddos/ddos-attacks/
