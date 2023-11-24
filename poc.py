@@ -3,26 +3,30 @@ import threading
 import time
 import argparse
 
+# file function to specify the dns resolvers list
 def get_resolvers_from_file(file_path):
     with open(file_path, 'r') as file:
         resolvers = [line.strip() for line in file.readlines()]
     return resolvers
 
+# queries function to send the dns queries as dns servers 
 def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, verbose):
     for resolver in resolvers:
         send_multiple_queries(domain, resolver, server_port, num_queries, interval, verbose)
 
+# specify the port 
 def get_address_port():
     address = input("Enter server address: ")
     port = int(input("Enter server port: "))
     return address, port
-
+    
+# Calling udp sub-libraries in socket to connect client with server 
 def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, verbose):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
     try:
-        # crafting DNS query message
+        # crafting valid DNS query message
         identifier = 0x1337.to_bytes(2, byteorder='big')
         flags = (0).to_bytes(2, byteorder='big')
         qdcount = (1).to_bytes(2, byteorder='big')
