@@ -2,8 +2,7 @@
 
 <img src = 'https://raw.githubusercontent.com/r3vskd/Meteorain/main/images/Screenshot_2.png'></img>
 
-:fire: https://github.com/r3vskd/Meteorain :fire:
-:warning: https://github.com/r3vskd/Meteorain :warning:
+:warning: This tool is only for educational purposes, use this responsibly :warning:
 
 ## Meteorain
 Proof of concept to perform DDoS using DNS amplification (reflection) technique.
