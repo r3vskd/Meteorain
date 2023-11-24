@@ -3,30 +3,25 @@ import threading
 import time
 import argparse
 
-# file function to specify the dns resolvers list
 def get_resolvers_from_file(file_path):
     with open(file_path, 'r') as file:
         resolvers = [line.strip() for line in file.readlines()]
     return resolvers
 
-# queries function to send the dns queries as dns servers 
 def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, verbose):
     for resolver in resolvers:
-        send_multiple_queries(domain, resolver, server_port, num_queries, interval, verbose)
+        send_dns_query(domain, resolver, server_port, num_queries, interval, verbose)
 
-# specify the port 
 def get_address_port():
     address = input("Enter server address: ")
     port = int(input("Enter server port: "))
     return address, port
-    
-# Calling udp sub-libraries in socket to connect client with server 
+
 def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, verbose):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
     try:
-        # crafting valid DNS query message
         identifier = 0x1337.to_bytes(2, byteorder='big')
         flags = (0).to_bytes(2, byteorder='big')
         qdcount = (1).to_bytes(2, byteorder='big')
@@ -38,32 +33,28 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, v
 
         dns_query = identifier + flags + qdcount + (b'\x00\x00\x00\x00\x00\x00') + qname + qtype + qclass
 
-        # If verbose mode is enabled, print information about the packet being sent
         if verbose:
             print(f"Sending DNS query for {domain_name} to {dns_server_address}:{dns_server_port}")
 
-        # Send DNS query to the server
         client_socket.sendto(dns_query, server_address)
 
-        # Receive the response from the server (1024 bytes buffer size)
         data, _ = client_socket.recvfrom(1024)
 
-        # If verbose mode is enabled, print information about the received packet
         if verbose:
-            print(f"Received DNS Response for {domain_name}:\n", data.hex())  # Print the response in hexadecimal format
+            print(f"Received DNS Response for {domain_name}:\n", data.hex())
 
     finally:
-        # Close the socket
         client_socket.close()
 
-def send_multiple_queries(domain, server_address, server_port, num_queries, interval, verbose):
+# Function to send multiple queries through resolvers concurrently
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, verbose):
     threads = []
-    for _ in range(num_queries):
-        thread = threading.Thread(target=send_dns_query, args=(domain, server_address, server_port, interval, verbose))
-        threads.append(thread)
-        thread.start()
+    for resolver in resolvers:
+        for _ in range(num_queries):
+            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, interval, verbose))
+            threads.append(thread)
+            thread.start()
 
-    # Wait for all threads to complete
     for thread in threads:
         thread.join()
 
@@ -106,6 +97,6 @@ if __name__ == "__main__":
     elif args.file and args.port and args.domain and args.server_address and args.num_queries and args.interval:
         resolvers=get_resolvers_from_file(args.file)
         send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.verbose)
-        send_multiple_queries(args.domain, args.server_address, args.server_port, args.num_queries, args.interval, args.verbose)
+        send_dns_query(args.domain, args.server_address, args.server_port, args.num_queries, args.interval, args.verbose)
     else:
          print("Please provide a file containing DNS resolver addresses using -f/--file, specify the DNS server port using -p/--port, the domain using -d/--domain, and the server address using -s/--server_address.")
