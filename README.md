@@ -1,5 +1,5 @@
 # Meteorain
-Script to perform DDoS using DNS amplification (reflection) technique.
+Proof of concept to perform DDoS using DNS amplification (reflection) technique.
 
 # What is a DNS amplification attack?
 This DDoS attack is a reflection-based volumetric distributed denial-of-service (DDoS) attack in which an attacker leverages the functionality of open DNS resolvers in order
