@@ -20,3 +20,4 @@ be able to handle the incoming traffic without becoming overwhelmed. As a result
 - https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/
 - https://blog.cloudflare.com/reflections-on-reflections/
 - https://www.imperva.com/learn/ddos/ddos-attacks/
+- https://www.exploit-db.com/exploits/44265
