@@ -1,3 +1,19 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+:toc:
+:toc-placement!:
+
+= Installing Integreatly
+
+:toc:
+toc::[]
+
 # Meteorain
 Proof of concept to perform DDoS using DNS amplification (reflection) technique.
 
@@ -23,7 +39,9 @@ be able to handle the incoming traffic without becoming overwhelmed. As a result
 - https://www.exploit-db.com/exploits/44265
 
 # Usage:
-```pip install -r requirements.txt```
+```
+pip install -r requirements.txt```
 
-```python python ./poc.py```
+```
+python python ./poc.py```
 
