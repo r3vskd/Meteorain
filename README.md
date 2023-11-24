@@ -1,10 +1,9 @@
 [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome) <img src="https://img.shields.io/badge/Python-3.8-blue"> <img src="https://img.shields.io/badge/Status-Beta-orange"> <img src="https://img.shields.io/badge/Version-1-red"> <img src="https://img.shields.io/badge/Licence-MIT-yellowgreen">
 
-:fire: Lastest and best tool in their type :fire:
-
-:warning: This is for educational purposes only, please not use illegally :warning:
-
 <img src = 'https://raw.githubusercontent.com/r3vskd/Meteorain/main/images/Screenshot_2.png'></img>
+
+:fire: https://github.com/r3vskd/Meteorain :fire:
+:warning: https://github.com/r3vskd/Meteorain :warning:
 
 ## Meteorain
 Proof of concept to perform DDoS using DNS amplification (reflection) technique.
