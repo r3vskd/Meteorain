@@ -1,18 +1,10 @@
-ifdef::env-github[]
-:tip-caption: :bulb:
-:note-caption: :information_source:
-:important-caption: :heavy_exclamation_mark:
-:caution-caption: :fire:
-:warning-caption: :warning:
-endif::[]
+[![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome) <img src="https://img.shields.io/badge/Python-3.8-blue"> <img src="https://img.shields.io/badge/Status-Beta-orange"> <img src="https://img.shields.io/badge/Version-1-red"> <img src="https://img.shields.io/badge/Licence-MIT-yellowgreen">
 
-:toc:
-:toc-placement!:
+:fire: Lastest and best tool in their type 
 
-= Installing Integreatly
+:warning: This is for educational purposes only, please not use illegally :warning:
 
-:toc:
-toc::[]
+<img src = '[https://user-images.githubusercontent.com/44644302/233476623-fcfa285e-ff6b-4a78-8386-8887a5245ac8.jpg](https://raw.githubusercontent.com/r3vskd/lupaosint/main/screenshots/cdf.jpg)'></img>
 
 # Meteorain
 Proof of concept to perform DDoS using DNS amplification (reflection) technique.
@@ -38,7 +30,7 @@ be able to handle the incoming traffic without becoming overwhelmed. As a result
 - https://www.imperva.com/learn/ddos/ddos-attacks/
 - https://www.exploit-db.com/exploits/44265
 
-# Usage:
+# Usage & installation:
 
 ``` pip install -r requirements.txt ```
 
