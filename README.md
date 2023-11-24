@@ -32,7 +32,7 @@ be able to handle the incoming traffic without becoming overwhelmed. As a result
 
 ``` pip install -r requirements.txt ```
 
-``` python python ./poc.py ```
+``` python ./poc.py ```
 
 ## Donation
 
