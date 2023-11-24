@@ -39,9 +39,8 @@ be able to handle the incoming traffic without becoming overwhelmed. As a result
 - https://www.exploit-db.com/exploits/44265
 
 # Usage:
-```
-pip install -r requirements.txt```
 
-```
-python python ./poc.py```
+```pip install -r requirements.txt```
+
+```python python ./poc.py```
 
