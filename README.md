@@ -21,3 +21,6 @@ be able to handle the incoming traffic without becoming overwhelmed. As a result
 - https://blog.cloudflare.com/reflections-on-reflections/
 - https://www.imperva.com/learn/ddos/ddos-attacks/
 - https://www.exploit-db.com/exploits/44265
+
+# Installation:
+```pip install -r requirements.txt```
