@@ -4,7 +4,7 @@
 
 :warning: This is for educational purposes only, please not use illegally :warning:
 
-<img src = 'https://user-images.githubusercontent.com/44644302/233476623-fcfa285e-ff6b-4a78-8386-8887a5245ac8.jpg](https://raw.githubusercontent.com/r3vskd/lupaosint/main/screenshots/cdf.jpg'></img>
+<img src = 'https://user-images.githubusercontent.com/44644302/233476623-fcfa285e-ff6b-4a78-8386-8887a5245ac8.jpg'></img>
 
 # Meteorain
 Proof of concept to perform DDoS using DNS amplification (reflection) technique.
