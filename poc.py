@@ -79,7 +79,7 @@ def display_banner():
                                               Warning: It was created for educational purposes. Please don't misuse it for illegal activities.         
 ''')
     print("Usage:")
-    print(" $python ./poc2.py -f resolvers.txt <domain> <server_address> <server_port> <num_queries> <interval>\n")
+    print(" $python ./poc2.py -f resolvers.txt -d domain.com -s xxx.xxx.xxx.xxx -p 80 -q 4 -i 1\n")
     print("Options:")
     print("  -f or --file             DNS Resolvers txt file")
     print("  -d or --domain           Set the domain name to query")
