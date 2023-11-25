@@ -34,6 +34,24 @@ be able to handle the incoming traffic without becoming overwhelmed. As a result
 
 ``` python ./poc.py ```
 
+## Example 
+
+``` python ./poc.py -d example.com -s 8.8.8.8 -p 53 -f resolvers.txt -q 10 -i 1 -v ```
+
+When performing DNS queries, your system typically uses a configured DNS resolver (which could be your ISP's DNS server or a custom DNS server like Google DNS - 8.8.8.8 or Cloudflare DNS - 1.1.1.1). However, with this script, you can override the default DNS resolver used by your system and specify a different DNS server using the --server_address parameter.
+
+For instance, if you want to test how a specific DNS server resolves a domain name (e.g., example.com), you can use this parameter to specify the IP address or hostname of that DNS server.
+
+Here's an example of how you might use this parameter in the script:
+
+-d example.com specifies the domain to query (example.com).
+-s 8.8.8.8 specifies the DNS server's address (in this case, Google's DNS server).
+-p 53 specifies the port used for DNS queries (defaulting to port 53).
+-f resolvers.txt is the file containing a list of DNS resolvers.
+-q 10 sets the number of queries to send (in this case, 10 queries per resolver).
+-i 1 sets the interval between queries to 1 second.
+-v enables verbose mode to display detailed information about the queries and responses.
+
 ## Donation
 
 Loved the project? You can buy me a coffee
