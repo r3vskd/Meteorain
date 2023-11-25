@@ -46,7 +46,6 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, v
     finally:
         client_socket.close()
 
-# Function to send multiple queries through resolvers concurrently
 def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, verbose):
     threads = []
     for resolver in resolvers:
