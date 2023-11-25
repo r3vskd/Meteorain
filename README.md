@@ -53,6 +53,7 @@ Here's an example of how you might use this parameter in the script:
 -v enables verbose mode to display detailed information about the queries and responses.
 
 # WARNING
+
  :warning: This script is intended for diagnostic or educational purposes and should be used responsibly. Misuse of this script could lead to unnecessary traffic or overload on DNS servers, which might impact their performance or violate usage policies. :warning:
 
 ## Donation
