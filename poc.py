@@ -66,7 +66,7 @@ def display_banner():
    █  ▀███▀    ▀      ▀███▀           █      █  ▐ █  █ █ 
   ▀                                  ▀      █     █   ██ 
                                            ▀  Author: r3vskd
-                                              Warning: It was created for educational purposes. Please don't misuse it for illegal activities.         
+                                              Warning: It was created for educational purposes. Please don't misuse it for illegal activitie.         
 ''')
     print("Usage:")
     print(" $python ./poc2.py -f resolvers.txt -d domain.com -s xxx.xxx.xxx.xxx -p 80 -q 4 -i 1\n")
