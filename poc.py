@@ -77,7 +77,7 @@ def display_banner():
     print("  -p or --port             Set the server port")
     print("  -q or --num_queries      Set the number of queries to send (Default: 1)")
     print("  -i or --interval         Set the interval between queries in seconds (Default: 1 second)")
-    print("  v or --verbose          Enable verbose mode (optional)\n")
+    print("  -v or --verbose          Enable verbose mode (optional)\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DNS query sender')
