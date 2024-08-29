@@ -2,6 +2,7 @@ import socket
 import threading
 import time
 import argparse
+import argparse
 
 def get_resolvers_from_file(file_path):
     with open(file_path, 'r') as file:
