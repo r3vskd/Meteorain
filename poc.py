@@ -30,9 +30,7 @@ def send_queries_through_resolvers(domain, resolvers, port, num_queries=1, inter
     for r in resolvers:
         for _ in range(num_queries):
             t = threading.Thread(target=send_dns_query, args=(domain, r, port, verbose, measure, qtype_name, edns_payload, dnssec_do))
-            threads.append(t)
-            t.start()
-            time.sleep(interval)
+            threads.append(t)\n            t.start()\n            time.sleep(interval)
     for t in threads:
         t.join()
 
@@ -54,6 +52,7 @@ if __name__ == "__main__":
             send_queries_through_resolvers(a.domain, rs, a.port, a.num_queries, a.interval, a.verbose, a.measure, a.qtype, a.edns_payload, a.dnssec_do)
         if a.server_address:
             send_dns_query(a.domain, a.server_address, a.port, a.verbose, a.measure, a.qtype, a.edns_payload, a.dnssec_do)
+
 
 
 
