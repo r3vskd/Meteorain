@@ -25,11 +25,11 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, verbose=Fal
     finally:
         s.close()
 
-def send_queries_through_resolvers(domain, resolvers, port, num_queries=1, interval=1.0, verbose=False):
+def send_queries_through_resolvers(domain, resolvers, port, num_queries=1, interval=1.0, verbose=False, measure=False, qtype_name='A', edns_payload=0, dnssec_do=False):
     threads = []
     for r in resolvers:
         for _ in range(num_queries):
-            t = threading.Thread(target=send_dns_query, args=(domain, r, port, verbose))
+            t = threading.Thread(target=send_dns_query, args=(domain, r, port, verbose, measure, qtype_name, edns_payload, dnssec_do))
             threads.append(t)
             t.start()
             time.sleep(interval)
@@ -51,9 +51,10 @@ if __name__ == "__main__":
     else:
         if a.file:
             rs = get_resolvers_from_file(a.file)
-            send_queries_through_resolvers(a.domain, rs, a.port, a.num_queries, a.interval, a.verbose)
+            send_queries_through_resolvers(a.domain, rs, a.port, a.num_queries, a.interval, a.verbose, a.measure, a.qtype, a.edns_payload, a.dnssec_do)
         if a.server_address:
             send_dns_query(a.domain, a.server_address, a.port, a.verbose, a.measure, a.qtype, a.edns_payload, a.dnssec_do)
+
 
 
 
