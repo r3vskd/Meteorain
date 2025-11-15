@@ -11,10 +11,10 @@ def get_resolvers_from_file(file_path):
         return [line.strip() for line in f if line.strip()]
 
 def send_dns_query(domain_name, dns_server_address, dns_server_port, verbose=False):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\ns.settimeout(1.0)
     try:
         identifier = (0x1337).to_bytes(2, 'big')
-        flags = (0).to_bytes(2, 'big')
+        flags = (0x0100).to_bytes(2, 'big')
         qdcount = (1).to_bytes(2, 'big')
         qtype = (1).to_bytes(2, 'big')
         qclass = (1).to_bytes(2, 'big')
@@ -57,3 +57,4 @@ if __name__ == "__main__":
             send_queries_through_resolvers(a.domain, rs, a.port, a.num_queries, a.interval, a.verbose)
         if a.server_address:
             send_dns_query(a.domain, a.server_address, a.port, a.verbose)
+
