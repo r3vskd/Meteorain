@@ -10,7 +10,7 @@ def get_resolvers_from_file(file_path):
     with open(file_path, 'r') as f:
         return [line.strip() for line in f if line.strip()]
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, verbose=False, measure=False, qtype_name='A'):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, verbose=False, measure=False, qtype_name='A', edns_payload=0, dnssec_do=False):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\ns.settimeout(1.0)
     try:
         identifier = (0x1337).to_bytes(2, 'big')
@@ -20,7 +20,7 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, verbose=Fal
         qclass = (1).to_bytes(2, 'big')
         labels = domain_name.split('.')
         qname = b''.join(len(l).to_bytes(1,'big')+l.encode() for l in labels) + b'\x00'
-        query = identifier + flags + qdcount + b'\x00\x00\x00\x00\x00\x00' + qname + qtype + qclass
+        query = identifier + flags + qdcount + b'\\x00\\x00\\x00\\x00\\x00\\x00' + qname + qtype + qclass
         s.sendto(query, (dns_server_address, dns_server_port))\n        data, _ = s.recvfrom(1024)\n        if verbose:\n            print(data.hex())\n        if measure:\n            print(f'Query size: {len(query)} bytes')\n            print(f'Response size: {len(data)} bytes')\n            print(f'Ratio: {round(len(data)/len(query),2)}x')
     finally:
         s.close()
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     p.add_argument('-p','--port', type=int, default=53)
     p.add_argument('-q','--num_queries', type=int, default=1)
     p.add_argument('-i','--interval', type=float, default=1.0)
-    p.add_argument('-v','--verbose', action='store_true')\n    p.add_argument('--qtype', type=str, default='A')
+    p.add_argument('-v','--verbose', action='store_true')\n    p.add_argument('--qtype', type=str, default='A')\n    p.add_argument('--edns_payload', type=int, default=0)\n    p.add_argument('--dnssec_do', action='store_true')
     a = p.parse_args()
     if not a.domain or not a.port:
         display_banner()
@@ -53,7 +53,8 @@ if __name__ == "__main__":
             rs = get_resolvers_from_file(a.file)
             send_queries_through_resolvers(a.domain, rs, a.port, a.num_queries, a.interval, a.verbose)
         if a.server_address:
-            send_dns_query(a.domain, a.server_address, a.port, a.verbose, a.measure, a.qtype)
+            send_dns_query(a.domain, a.server_address, a.port, a.verbose, a.measure, a.qtype, a.edns_payload, a.dnssec_do)
+
 
 
 
