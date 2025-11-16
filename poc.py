@@ -22,14 +22,14 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, timeout=1.0, bufsize=2048):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, timeout=1.0, bufsize=2048, rd=True):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
     try:
         client_socket.settimeout(timeout)
         identifier = 0x1337.to_bytes(2, byteorder='big')
-        flags = (0x0100).to_bytes(2, byteorder='big')
+        flags = (0x0100 if rd else 0).to_bytes(2, byteorder='big')
         qdcount = (1).to_bytes(2, byteorder='big')
         qtype_value = QTYPE_MAP.get(qtype_name.upper(), 1)
         qtype = (qtype_value).to_bytes(2, byteorder='big')
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
     parser.add_argument('--qtype', type=str, default='A', help='DNS query type')
     parser.add_argument('--edns_payload', type=int, default=0, help='EDNS UDP payload size')
-    parser.add_argument('--dnssec_do', action='store_true', help='Enable DNSSEC DO bit')
+    parser.add_argument('--dnssec_do', action='store_true', help='Enable DNSSEC DO bit')\n    parser.add_argument('--no_rd', action='store_true', help='Disable recursion (RD=0)')
     parser.add_argument('--measure', action='store_true', help='Show query/response sizes and ratio')\n    parser.add_argument('--bufsize', type=int, default=2048, help='Receive buffer size')
 
     args = parser.parse_args()
@@ -134,6 +134,7 @@ if __name__ == "__main__":
             send_dns_query(args.domain, args.server_address, args.port, args.interval, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, args.timeout, args.bufsize)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
+
 
 
 
