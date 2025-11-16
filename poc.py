@@ -175,3 +175,4 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, verbose
         print(f"Query size: {len(query)} bytes")
         print(f"Response size: {len(data)} bytes")
         print(f"Ratio: {round(len(data)/len(query), 2)}x")
+
