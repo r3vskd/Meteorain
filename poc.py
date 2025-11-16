@@ -23,7 +23,7 @@ def get_address_port():
     return address, port
 
 def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, timeout=1.0, bufsize=2048, rd=True, src_port=0):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    client_socket = socket.socket(socket.AF_INET6 if af == 'inet6' else socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
     try:
@@ -175,5 +175,6 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, verbose
         print(f"Query size: {len(query)} bytes")
         print(f"Response size: {len(data)} bytes")
         print(f"Ratio: {round(len(data)/len(query), 2)}x")
+
 
 
