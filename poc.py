@@ -22,7 +22,7 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, timeout=1.0, bufsize=2048, rd=True):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, timeout=1.0, bufsize=2048, rd=True, src_port=0):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
@@ -134,6 +134,7 @@ if __name__ == "__main__":
             send_dns_query(args.domain, args.server_address, args.port, args.interval, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, args.timeout, args.bufsize)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
+
 
 
 
