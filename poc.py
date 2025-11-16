@@ -115,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--server_address', type=str, help='DNS server address')
     parser.add_argument('-p', '--port', type=int, help='DNS server port')
     parser.add_argument('-q', '--num_queries', type=int, default=1, help='Number of queries to send')
-    parser.add_argument('-i', '--interval', type=float, default=1.0, help='Interval between queries in seconds')\n    parser.add_argument('--timeout', type=float, default=1.0, help='Socket timeout in seconds')
+    parser.add_argument('-i', '--interval', type=float, default=1.0, help='Interval between queries in seconds')\n    parser.add_argument('--timeout', type=float, default=2.0, help='Socket timeout in seconds')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
     parser.add_argument('--qtype', type=str, default='A', help='DNS query type')
     parser.add_argument('--edns_payload', type=int, default=0, help='EDNS UDP payload size')
@@ -175,6 +175,7 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, verbose
         print(f"Query size: {len(query)} bytes")
         print(f"Response size: {len(data)} bytes")
         print(f"Ratio: {round(len(data)/len(query), 2)}x")
+
 
 
 
