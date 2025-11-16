@@ -35,7 +35,7 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, interval, v
         qtype = (qtype_value).to_bytes(2, byteorder='big')
         qclass = (1).to_bytes(2, byteorder='big')
 
-        labels = domain_name.split('.')
+        labels = domain_name.lower().split('.')
         qname = b''.join(len(label).to_bytes(1, byteorder='big') + label.encode() for label in labels) + b'\x00'
 
         ancount = (0).to_bytes(2, byteorder='big')
@@ -148,7 +148,7 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, verbose
     qtype_value = QTYPE_MAP.get(qtype_name.upper(), 1)
     qtype = (qtype_value).to_bytes(2, 'big')
     qclass = (1).to_bytes(2, 'big')
-    labels = domain_name.split('.')
+    labels = domain_name.lower().split('.')
     qname = b''.join(len(label).to_bytes(1, 'big') + label.encode() for label in labels) + b'\x00'
     ancount = (0).to_bytes(2, 'big')
     nscount = (0).to_bytes(2, 'big')
@@ -175,6 +175,7 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, verbose
         print(f"Query size: {len(query)} bytes")
         print(f"Response size: {len(data)} bytes")
         print(f"Ratio: {round(len(data)/len(query), 2)}x")
+
 
 
 
