@@ -130,6 +130,7 @@ if __name__ == "__main__":
     parser.add_argument('--measure', action='store_true', help='Show query/response sizes and ratio')
     parser.add_argument('--no_rd', action='store_true', help='Disable RD flag')
     parser.add_argument('--src_port', type=int, default=0, help='Bind local source port')
+    parser.add_argument('--tcp', action='store_true', help='Use TCP transport')
 
     args = parser.parse_args()
 
@@ -140,6 +141,48 @@ if __name__ == "__main__":
             resolvers = get_resolvers_from_file(args.file)
             send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port)
         if args.server_address:
-            send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port)
+            if args.tcp:
+                send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd)
+            else:
+                send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
+def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(timeout)
+    identifier = 0x1337.to_bytes(2, 'big')
+    flags = (0x0100 if rd else 0).to_bytes(2, 'big')
+    qdcount = (1).to_bytes(2, 'big')
+    qtype_value = QTYPE_MAP.get(qtype_name.upper(), 1)
+    qtype = (qtype_value).to_bytes(2, 'big')
+    qclass = (1).to_bytes(2, 'big')
+    labels = domain_name.split('.')
+    qname = b''.join(len(label).to_bytes(1, 'big') + label.encode() for label in labels) + b'\x00'
+    ancount = (0).to_bytes(2, 'big')
+    nscount = (0).to_bytes(2, 'big')
+    arcount = (1).to_bytes(2, 'big') if edns_payload > 0 else (0).to_bytes(2, 'big')
+    query = identifier + flags + qdcount + ancount + nscount + arcount + qname + qtype + qclass
+    if edns_payload > 0:
+        opt_name = b'\x00'
+        opt_type = (41).to_bytes(2, 'big')
+        opt_udp_payload = (edns_payload).to_bytes(2, 'big')
+        ext_rcode = (0).to_bytes(1, 'big')
+        version = (0).to_bytes(1, 'big')
+        flags_do = (0x8000 if dnssec_do else 0).to_bytes(2, 'big')
+        rdata_len = (0).to_bytes(2, 'big')
+        opt_record = opt_name + opt_type + opt_udp_payload + ext_rcode + version + flags_do + rdata_len
+        query += opt_record
+    length = len(query).to_bytes(2, 'big')
+    s.connect((dns_server_address, dns_server_port))
+    s.sendall(length + query)
+    try:
+        data = s.recv(bufsize)
+        if verbose:
+            print(data.hex())
+        if measure:
+            print(f"Query size: {len(query)} bytes")
+            print(f"Response size: {len(data)} bytes")
+            if len(query) > 0:
+                print(f"Ratio: {round(len(data)/len(query), 2)}x")
+    finally:
+        s.close()
