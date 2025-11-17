@@ -22,14 +22,14 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
     try:
         client_socket.settimeout(timeout)
         identifier = 0x1337.to_bytes(2, byteorder='big')
-        flags = (0x0100).to_bytes(2, byteorder='big')
+        flags = (0x0100 if rd else 0).to_bytes(2, byteorder='big')
         qdcount = (1).to_bytes(2, byteorder='big')
         qtype_value = QTYPE_MAP.get(qtype_name.upper(), 1)
         qtype = (qtype_value).to_bytes(2, byteorder='big')
@@ -74,11 +74,11 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
     finally:
         client_socket.close()
 
-def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False):
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True):
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
-            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure))
+            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd))
             threads.append(thread)
             thread.start()
             time.sleep(interval)
@@ -123,6 +123,7 @@ if __name__ == "__main__":
     parser.add_argument('--edns_payload', type=int, default=0, help='EDNS UDP payload size')
     parser.add_argument('--dnssec_do', action='store_true', help='Enable DNSSEC DO bit')
     parser.add_argument('--measure', action='store_true', help='Show query/response sizes and ratio')
+    parser.add_argument('--no_rd', action='store_true', help='Disable RD flag')
 
     args = parser.parse_args()
 
@@ -131,8 +132,8 @@ if __name__ == "__main__":
     else:
         if args.file:
             resolvers = get_resolvers_from_file(args.file)
-            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure)
+            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd)
         if args.server_address:
-            send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure)
+            send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
