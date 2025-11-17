@@ -22,7 +22,7 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
@@ -66,9 +66,13 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
                 pass
         attempt = 0
         while True:
+            start_time = time.perf_counter() if latency else None
             client_socket.sendto(dns_query, server_address)
             try:
                 data, _ = client_socket.recvfrom(bufsize)
+                if latency and start_time is not None:
+                    elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+                    print(f"Latency: {elapsed_ms:.2f} ms")
                 if verbose:
                     print(f"Received DNS Response for {domain_name}:\n", data.hex())
                     if measure:
@@ -94,11 +98,11 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
     finally:
         client_socket.close()
 
-def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0):
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False):
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
-            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries))
+            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries, latency))
             threads.append(thread)
             thread.start()
             time.sleep(interval)
@@ -148,6 +152,7 @@ if __name__ == "__main__":
     parser.add_argument('--tcp', action='store_true', help='Use TCP transport')
     parser.add_argument('--tcp_on_trunc', action='store_true', help='Fallback to TCP on truncation')
     parser.add_argument('--retry', type=int, default=0, help='Retry count on timeout')
+    parser.add_argument('--latency', action='store_true', help='Print DNS latency')
 
     args = parser.parse_args()
 
@@ -156,12 +161,12 @@ if __name__ == "__main__":
     else:
         if args.file:
             resolvers = get_resolvers_from_file(args.file)
-            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry)
+            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency)
         if args.server_address:
             if args.tcp:
                 send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd)
             else:
-                send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry)
+                send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
 def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True):
