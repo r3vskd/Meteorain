@@ -22,7 +22,7 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
@@ -62,7 +62,7 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, ve
         client_socket.sendto(dns_query, server_address)
 
         try:
-            data, _ = client_socket.recvfrom(1024)
+            data, _ = client_socket.recvfrom(bufsize)
             if verbose:
                 print(f"Received DNS Response for {domain_name}:\n", data.hex())
                 if measure:
@@ -74,11 +74,11 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, ve
     finally:
         client_socket.close()
 
-def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False):
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False):
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
-            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, verbose, qtype_name, edns_payload, dnssec_do, measure))
+            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure))
             threads.append(thread)
             thread.start()
             time.sleep(interval)
@@ -117,6 +117,7 @@ if __name__ == "__main__":
     parser.add_argument('-q', '--num_queries', type=int, default=1, help='Number of queries to send')
     parser.add_argument('-i', '--interval', type=float, default=1.0, help='Interval between queries in seconds')
     parser.add_argument('--timeout', type=float, default=2.0, help='Socket timeout in seconds')
+    parser.add_argument('--bufsize', type=int, default=4096, help='UDP receive buffer size')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
     parser.add_argument('--qtype', type=str, default='A', help='DNS query type')
     parser.add_argument('--edns_payload', type=int, default=0, help='EDNS UDP payload size')
@@ -130,8 +131,8 @@ if __name__ == "__main__":
     else:
         if args.file:
             resolvers = get_resolvers_from_file(args.file)
-            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure)
+            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure)
         if args.server_address:
-            send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure)
+            send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
