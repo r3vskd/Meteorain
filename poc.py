@@ -134,7 +134,7 @@ if __name__ == "__main__":
     parser.add_argument('--bufsize', type=int, default=4096, help='UDP receive buffer size')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode')
     parser.add_argument('--qtype', type=str, default='A', help='DNS query type')
-    parser.add_argument('--edns_payload', type=int, default=0, help='EDNS UDP payload size')
+    parser.add_argument('--edns_payload', type=int, default=1232, help='EDNS UDP payload size')
     parser.add_argument('--dnssec_do', action='store_true', help='Enable DNSSEC DO bit')
     parser.add_argument('--measure', action='store_true', help='Show query/response sizes and ratio')
     parser.add_argument('--no_rd', action='store_true', help='Disable RD flag')
