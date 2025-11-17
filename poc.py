@@ -22,7 +22,7 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
@@ -72,6 +72,15 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
                 print(f"Received DNS Response for {domain_name}:\n", data.hex())
                 if measure:
                     print(f"Response size: {len(data)} bytes, ratio: {round(len(data)/len(dns_query), 2)}x")
+            if tcp_on_trunc and len(data) >= 4:
+                flags_int = int.from_bytes(data[2:4], 'big')
+                if (flags_int & 0x0200) != 0:
+                    try:
+                        if verbose:
+                            print("Truncated UDP response, retrying via TCP")
+                        send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd)
+                    except Exception:
+                        pass
         except socket.timeout:
             if verbose:
                 print(f"Timeout waiting for DNS response for {domain_name}")
@@ -79,11 +88,11 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
     finally:
         client_socket.close()
 
-def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0):
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False):
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
-            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port))
+            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc))
             threads.append(thread)
             thread.start()
             time.sleep(interval)
@@ -131,6 +140,7 @@ if __name__ == "__main__":
     parser.add_argument('--no_rd', action='store_true', help='Disable RD flag')
     parser.add_argument('--src_port', type=int, default=0, help='Bind local source port')
     parser.add_argument('--tcp', action='store_true', help='Use TCP transport')
+    parser.add_argument('--tcp_on_trunc', action='store_true', help='Fallback to TCP on truncation')
 
     args = parser.parse_args()
 
@@ -139,7 +149,7 @@ if __name__ == "__main__":
     else:
         if args.file:
             resolvers = get_resolvers_from_file(args.file)
-            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port)
+            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc)
         if args.server_address:
             if args.tcp:
                 send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd)
