@@ -42,7 +42,7 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto'):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False):
     client_socket = socket.socket(_select_af(dns_server_address, af), socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
@@ -71,8 +71,11 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
             ext_rcode = (0).to_bytes(1, byteorder='big')
             version = (0).to_bytes(1, byteorder='big')
             flags_do = (0x8000 if dnssec_do else 0).to_bytes(2, byteorder='big')
-            rdata_len = (0).to_bytes(2, byteorder='big')
-            opt_record = opt_name + opt_type + opt_udp_payload + ext_rcode + version + flags_do + rdata_len
+            rdata = b''
+            if edns_nsid:
+                rdata += (3).to_bytes(2, 'big') + (0).to_bytes(2, 'big')
+            rdata_len = (len(rdata)).to_bytes(2, 'big')
+            opt_record = opt_name + opt_type + opt_udp_payload + ext_rcode + version + flags_do + rdata_len + rdata
             dns_query += opt_record
 
         if verbose:
@@ -119,11 +122,11 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
     finally:
         client_socket.close()
 
-def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto'):
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False):
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
-            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries, latency, af))
+            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries, latency, af, edns_nsid))
             threads.append(thread)
             thread.start()
             time.sleep(interval)
@@ -175,6 +178,7 @@ if __name__ == "__main__":
     parser.add_argument('--retry', type=int, default=0, help='Retry count on timeout')
     parser.add_argument('--latency', action='store_true', help='Print DNS latency')
     parser.add_argument('--tcp_bufsize', type=int, default=None, help='TCP receive buffer size')
+    parser.add_argument('--edns_nsid', action='store_true', help='Request NSID via EDNS')
     parser.add_argument('--af', type=str, default='auto', choices=['auto','4','6'], help='Address family (auto/4/6)')
 
     args = parser.parse_args()
@@ -184,15 +188,15 @@ if __name__ == "__main__":
     else:
         if args.file:
             resolvers = get_resolvers_from_file(args.file)
-            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af)
+            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid)
         if args.server_address:
             if args.tcp:
-                send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.af, args.tcp_bufsize)
+                send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.af, args.tcp_bufsize, args.edns_nsid)
             else:
-                send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af)
+                send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
-def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, af='auto', tcp_bufsize=None):
+def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, af='auto', tcp_bufsize=None, edns_nsid=False):
     s = socket.socket(_select_af(dns_server_address, af), socket.SOCK_STREAM)
     s.settimeout(timeout)
     identifier = 0x1337.to_bytes(2, 'big')
@@ -215,8 +219,11 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout
         ext_rcode = (0).to_bytes(1, 'big')
         version = (0).to_bytes(1, 'big')
         flags_do = (0x8000 if dnssec_do else 0).to_bytes(2, 'big')
-        rdata_len = (0).to_bytes(2, 'big')
-        opt_record = opt_name + opt_type + opt_udp_payload + ext_rcode + version + flags_do + rdata_len
+        rdata = b''
+        if edns_nsid:
+            rdata += (3).to_bytes(2, 'big') + (0).to_bytes(2, 'big')
+        rdata_len = (len(rdata)).to_bytes(2, 'big')
+        opt_record = opt_name + opt_type + opt_udp_payload + ext_rcode + version + flags_do + rdata_len + rdata
         query += opt_record
     length = len(query).to_bytes(2, 'big')
     s.connect((dns_server_address, dns_server_port))
