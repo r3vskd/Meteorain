@@ -20,6 +20,24 @@ QTYPE_MAP = {
     'CAA': 257,
 }
 
+def _print_dns_header(data):
+    if len(data) < 12:
+        return
+    ident = int.from_bytes(data[0:2], 'big')
+    flags = int.from_bytes(data[2:4], 'big')
+    qd = int.from_bytes(data[4:6], 'big')
+    an = int.from_bytes(data[6:8], 'big')
+    ns = int.from_bytes(data[8:10], 'big')
+    ar = int.from_bytes(data[10:12], 'big')
+    qr = (flags >> 15) & 1
+    opcode = (flags >> 11) & 0xF
+    aa = (flags >> 10) & 1
+    tc = (flags >> 9) & 1
+    rd = (flags >> 8) & 1
+    ra = (flags >> 7) & 1
+    rcode = flags & 0xF
+    print(f"ID={ident} QR={qr} OPCODE={opcode} AA={aa} TC={tc} RD={rd} RA={ra} RCODE={rcode} QD={qd} AN={an} NS={ns} AR={ar}")
+
 def _select_af(address, af_hint):
     if af_hint == '6':
         return socket.AF_INET6
@@ -99,7 +117,9 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
                     elapsed_ms = (time.perf_counter() - start_time) * 1000.0
                     print(f"Latency: {elapsed_ms:.2f} ms")
                 if verbose:
-                    print(f"Received DNS Response for {domain_name}:\n", data.hex())
+                    print(f"Received DNS Response for {domain_name}:")
+                    _print_dns_header(data)
+                    print(data.hex())
                     if measure:
                         print(f"Response size: {len(data)} bytes, ratio: {round(len(data)/len(dns_query), 2)}x")
                 if tcp_on_trunc and len(data) >= 4:
@@ -235,6 +255,7 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout
     try:
         data = s.recv(tcp_bufsize or bufsize)
         if verbose:
+            _print_dns_header(data)
             print(data.hex())
         if measure:
             print(f"Query size: {len(query)} bytes")
