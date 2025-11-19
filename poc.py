@@ -50,6 +50,38 @@ def _select_af(address, af_hint):
         return socket.AF_INET
     return socket.AF_INET6 if (':' in address) else socket.AF_INET
 
+def _resolver_host_port(item, default_port):
+    t = item.strip()
+    if not t:
+        return t, default_port
+    if t.startswith('[') and ']' in t:
+        end = t.index(']')
+        host = t[1:end]
+        rest = t[end+1:]
+        if rest.startswith(':'):
+            try:
+                return host, int(rest[1:])
+            except Exception:
+                return host, default_port
+        return host, default_port
+    if ' ' in t:
+        parts = t.split()
+        host = parts[0]
+        port = default_port
+        if len(parts) > 1:
+            try:
+                port = int(parts[1])
+            except Exception:
+                pass
+        return host, port
+    if ':' in t and t.count(':') == 1:
+        host, ps = t.split(':', 1)
+        try:
+            return host, int(ps)
+        except Exception:
+            return host, default_port
+    return t, default_port
+
 def get_resolvers_from_file(file_path):
     with open(file_path, 'r') as file:
         items = []
@@ -153,11 +185,15 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
     finally:
         client_socket.close()
 
-def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False, qclass=1, txid=0x1337, src_addr=None, raw_hex=False, burst=False):
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False, qclass=1, txid=0x1337, src_addr=None, raw_hex=False, burst=False, use_tcp=False, tcp_bufsize=None, tcp_nodelay=False, tcp_timeout=None, print_query=False, id_random=False):
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
-            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries, latency, af, edns_nsid, qclass, txid, src_addr, raw_hex, False, False))
+            host, rport = _resolver_host_port(resolver, server_port)
+            if use_tcp:
+                thread = threading.Thread(target=send_dns_query_tcp, args=(domain, host, rport, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, af, tcp_bufsize, edns_nsid, qclass, txid, raw_hex, tcp_nodelay, print_query, id_random, tcp_timeout))
+            else:
+                thread = threading.Thread(target=send_dns_query, args=(domain, host, rport, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries, latency, af, edns_nsid, qclass, txid, src_addr, raw_hex, print_query, id_random))
             threads.append(thread)
             thread.start()
             if not burst:
