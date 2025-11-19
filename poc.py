@@ -152,14 +152,15 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
     finally:
         client_socket.close()
 
-def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False, qclass=1, txid=0x1337, src_addr=None, raw_hex=False):
+def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, interval, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False, qclass=1, txid=0x1337, src_addr=None, raw_hex=False, burst=False):
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
             thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries, latency, af, edns_nsid, qclass, txid, src_addr, raw_hex))
             threads.append(thread)
             thread.start()
-            time.sleep(interval)
+            if not burst:
+                time.sleep(interval)
 
     for thread in threads:
         thread.join()
@@ -216,6 +217,7 @@ if __name__ == "__main__":
     parser.add_argument('--hex', action='store_true', help='Print raw hex of responses')
     parser.add_argument('--tcp_nodelay', action='store_true', help='Disable Nagle for TCP')
     parser.add_argument('--tcp_timeout', type=float, default=None, help='TCP timeout override')
+    parser.add_argument('--burst', action='store_true', help='Start threads without delay')
     parser.add_argument('--id_random', action='store_true', help='Randomize TXID per query')
 
     args = parser.parse_args()
@@ -225,7 +227,7 @@ if __name__ == "__main__":
     else:
         if args.file:
             resolvers = get_resolvers_from_file(args.file)
-            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid, args.qclass, args.id, args.src_addr, args.hex)
+            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid, args.qclass, args.id, args.src_addr, args.hex, args.burst)
         if args.server_address:
             if args.tcp:
                 send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.af, args.tcp_bufsize, args.edns_nsid, args.qclass, args.id, args.hex, args.tcp_nodelay, args.print_query, args.id_random, args.tcp_timeout)
