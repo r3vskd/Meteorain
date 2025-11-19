@@ -36,7 +36,12 @@ def _print_dns_header(data):
     rd = (flags >> 8) & 1
     ra = (flags >> 7) & 1
     rcode = flags & 0xF
-    print(f"ID={ident} QR={qr} OPCODE={opcode} AA={aa} TC={tc} RD={rd} RA={ra} RCODE={rcode} QD={qd} AN={an} NS={ns} AR={ar}")
+    names = {
+        0: 'NOERROR', 1: 'FORMERR', 2: 'SERVFAIL', 3: 'NXDOMAIN', 4: 'NOTIMP', 5: 'REFUSED',
+        6: 'YXDOMAIN', 7: 'YXRRSET', 8: 'NXRRSET', 9: 'NOTAUTH', 10: 'NOTZONE'
+    }
+    n = names.get(rcode, str(rcode))
+    print(f"ID={ident} QR={qr} OPCODE={opcode} AA={aa} TC={tc} RD={rd} RA={ra} RCODE={n} QD={qd} AN={an} NS={ns} AR={ar}")
 
 def _select_af(address, af_hint):
     if af_hint == '6':
