@@ -65,13 +65,14 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False, qclass=1, txid=0x1337, src_addr=None, raw_hex=False, print_query=False):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False, qclass=1, txid=0x1337, src_addr=None, raw_hex=False, print_query=False, id_random=False):
     client_socket = socket.socket(_select_af(dns_server_address, af), socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
     try:
         client_socket.settimeout(timeout)
-        identifier = int(txid).to_bytes(2, byteorder='big', signed=False)
+        import random
+        identifier = int((random.randint(0, 0xFFFF) if id_random else txid)).to_bytes(2, byteorder='big', signed=False)
         flags = (0x0100 if rd else 0).to_bytes(2, byteorder='big')
         qdcount = (1).to_bytes(2, byteorder='big')
         qtype_value = QTYPE_MAP.get(qtype_name.upper(), 1)
@@ -156,7 +157,7 @@ def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, 
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
-            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries, latency, af, edns_nsid, qclass, txid, src_addr, raw_hex))
+            thread = threading.Thread(target=send_dns_query, args=(domain, resolver, server_port, timeout, bufsize, verbose, qtype_name, edns_payload, dnssec_do, measure, rd, src_port, tcp_on_trunc, retries, latency, af, edns_nsid, qclass, txid, src_addr, raw_hex, False, False))
             threads.append(thread)
             thread.start()
             if not burst:
