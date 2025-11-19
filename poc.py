@@ -215,6 +215,7 @@ if __name__ == "__main__":
     parser.add_argument('--af', type=str, default='auto', choices=['auto','4','6'], help='Address family (auto/4/6)')
     parser.add_argument('--hex', action='store_true', help='Print raw hex of responses')
     parser.add_argument('--tcp_nodelay', action='store_true', help='Disable Nagle for TCP')
+    parser.add_argument('--id_random', action='store_true', help='Randomize TXID per query')
 
     args = parser.parse_args()
 
@@ -226,12 +227,12 @@ if __name__ == "__main__":
             send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid, args.qclass, args.id, args.src_addr, args.hex)
         if args.server_address:
             if args.tcp:
-                send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.af, args.tcp_bufsize, args.edns_nsid, args.qclass, args.id, args.hex, args.tcp_nodelay)
+                send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.af, args.tcp_bufsize, args.edns_nsid, args.qclass, args.id, args.hex, args.tcp_nodelay, args.print_query, args.id_random)
             else:
-                send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid, args.qclass, args.id, args.src_addr, args.hex)
+                send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid, args.qclass, args.id, args.src_addr, args.hex, args.print_query, args.id_random)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
-def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, af='auto', tcp_bufsize=None, edns_nsid=False, qclass=1, txid=0x1337, raw_hex=False, tcp_nodelay=False, print_query=False):
+def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, af='auto', tcp_bufsize=None, edns_nsid=False, qclass=1, txid=0x1337, raw_hex=False, tcp_nodelay=False, print_query=False, id_random=False):
     s = socket.socket(_select_af(dns_server_address, af), socket.SOCK_STREAM)
     s.settimeout(timeout)
     if tcp_nodelay:
@@ -239,7 +240,8 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout
             s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         except Exception:
             pass
-    identifier = int(txid).to_bytes(2, 'big', signed=False)
+    import random
+    identifier = int((random.randint(0, 0xFFFF) if id_random else txid)).to_bytes(2, 'big', signed=False)
     flags = (0x0100 if rd else 0).to_bytes(2, 'big')
     qdcount = (1).to_bytes(2, 'big')
     qtype_value = QTYPE_MAP.get(qtype_name.upper(), 1)
