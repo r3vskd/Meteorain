@@ -60,7 +60,7 @@ def get_address_port():
     port = int(input("Enter server port: "))
     return address, port
 
-def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False, qclass=1, txid=0x1337, src_addr=None, raw_hex=False):
+def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, src_port=0, tcp_on_trunc=False, retries=0, latency=False, af='auto', edns_nsid=False, qclass=1, txid=0x1337, src_addr=None, raw_hex=False, print_query=False):
     client_socket = socket.socket(_select_af(dns_server_address, af), socket.SOCK_DGRAM)
     server_address = (dns_server_address, dns_server_port)
 
@@ -98,6 +98,8 @@ def send_dns_query(domain_name, dns_server_address, dns_server_port, timeout, bu
 
         if verbose:
             print(f"Sending DNS query for {domain_name} to {dns_server_address}:{dns_server_port}")
+            if print_query:
+                print(dns_query.hex())
             if measure:
                 print(f"Query size: {len(dns_query)} bytes")
 
@@ -224,7 +226,7 @@ if __name__ == "__main__":
                 send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid, args.qclass, args.id, args.src_addr, args.hex)
         if not args.file and not args.server_address:
             print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
-def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, af='auto', tcp_bufsize=None, edns_nsid=False, qclass=1, txid=0x1337, raw_hex=False, tcp_nodelay=False):
+def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, af='auto', tcp_bufsize=None, edns_nsid=False, qclass=1, txid=0x1337, raw_hex=False, tcp_nodelay=False, print_query=False):
     s = socket.socket(_select_af(dns_server_address, af), socket.SOCK_STREAM)
     s.settimeout(timeout)
     if tcp_nodelay:
@@ -260,6 +262,8 @@ def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout
         query += opt_record
     length = len(query).to_bytes(2, 'big')
     s.connect((dns_server_address, dns_server_port))
+    if verbose and print_query:
+        print(query.hex())
     s.sendall(length + query)
     try:
         data = s.recv(tcp_bufsize or bufsize)
