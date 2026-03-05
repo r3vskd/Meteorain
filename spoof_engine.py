@@ -9,3 +9,11 @@ def _is_root():
         import ctypes
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
     return os.getuid() == 0
+
+
+def check_root():
+    if not _is_root():
+        raise PermissionError(
+            "Spoofed mode requires root/administrator privileges "
+            "(raw sockets need elevated permissions)."
+        )
