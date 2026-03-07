@@ -10,3 +10,9 @@ def test_check_root_raises_on_non_root(monkeypatch):
     monkeypatch.setattr(spoof_engine, '_is_root', lambda: False)
     with pytest.raises(PermissionError, match="root"):
         spoof_engine.check_root()
+
+
+def test_check_root_passes_as_root(monkeypatch):
+    import spoof_engine
+    monkeypatch.setattr(spoof_engine, '_is_root', lambda: True)
+    spoof_engine.check_root()
