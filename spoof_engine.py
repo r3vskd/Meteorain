@@ -1,6 +1,7 @@
 """DNS amplification spoof engine -- Layer-3 IP spoofing via Scapy."""
 
 import os
+import random as _random
 import sys
 
 QTYPE_MAP = {
@@ -8,6 +9,10 @@ QTYPE_MAP = {
     'TXT': 16, 'NS': 2, 'CNAME': 5, 'SOA': 6, 'PTR': 12,
     'MX': 15, 'SRV': 33, 'NAPTR': 35, 'CAA': 257,
 }
+
+
+def _make_txid(txid, id_random):
+    return _random.randint(0, 0xFFFF) if id_random else txid
 
 
 def _is_root():
