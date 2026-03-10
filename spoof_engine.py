@@ -4,6 +4,10 @@ import os
 import random as _random
 import sys
 
+from scapy.all import send as scapy_send
+from scapy.layers.dns import DNS, DNSQR, DNSRROPT
+from scapy.layers.inet import IP, UDP
+
 QTYPE_MAP = {
     'A': 1, 'AAAA': 28, 'ANY': 255, 'DNSKEY': 48, 'DS': 43,
     'TXT': 16, 'NS': 2, 'CNAME': 5, 'SOA': 6, 'PTR': 12,
