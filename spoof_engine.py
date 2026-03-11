@@ -32,3 +32,10 @@ def check_root():
             "Spoofed mode requires root/administrator privileges "
             "(raw sockets need elevated permissions)."
         )
+
+
+def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
+                           victim_src_port=53, qtype='ANY', edns_payload=4096,
+                           dnssec_do=False, txid=0x1337, id_random=False,
+                           verbose=False, measure=False, qclass=1):
+    pass
