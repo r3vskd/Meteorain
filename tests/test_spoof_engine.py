@@ -28,3 +28,15 @@ def test_send_spoofed_dns_query_calls_scapy_send():
             victim_ip='1.2.3.4', victim_src_port=53, qtype='ANY',
             edns_payload=4096, txid=0x1337, id_random=False)
     assert len(sent) == 1
+
+
+def test_victim_ip_is_packet_source():
+    import spoof_engine
+    from scapy.layers.inet import IP
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='5.5.5.5', victim_src_port=53)
+    assert captured[0][IP].src == '5.5.5.5'
+    assert captured[0][IP].dst == '8.8.8.8'
