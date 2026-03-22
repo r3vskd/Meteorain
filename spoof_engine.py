@@ -3,6 +3,7 @@
 import os
 import random as _random
 import sys
+import time as _time_module
 
 from scapy.all import send as scapy_send
 from scapy.layers.dns import DNS, DNSQR, DNSRROPT
@@ -17,6 +18,10 @@ QTYPE_MAP = {
 
 def _make_txid(txid, id_random):
     return _random.randint(0, 0xFFFF) if id_random else txid
+
+
+def _time_sleep(s):
+    _time_module.sleep(s)
 
 
 def _is_root():
