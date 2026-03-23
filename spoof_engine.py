@@ -3,6 +3,7 @@
 import os
 import random as _random
 import sys
+import threading as _threading
 import time as _time_module
 
 from scapy.all import send as scapy_send
