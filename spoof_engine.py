@@ -82,3 +82,5 @@ def send_spoofed_queries_through_resolvers(domain, resolvers, resolver_port,
             t.start()
             if not burst:
                 _time_sleep(interval)
+    for t in threads:
+        t.join()
