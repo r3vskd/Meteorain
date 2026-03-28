@@ -1,6 +1,7 @@
 import pytest
 import sys
 import os
+import threading
 from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -40,3 +41,18 @@ def test_victim_ip_is_packet_source():
             victim_ip='5.5.5.5', victim_src_port=53)
     assert captured[0][IP].src == '5.5.5.5'
     assert captured[0][IP].dst == '8.8.8.8'
+
+
+def test_resolver_loop_fires_all_threads():
+    import spoof_engine
+    lock = threading.Lock()
+    count = []
+    def fake_send(p, verbose):
+        with lock:
+            count.append(1)
+    with patch('spoof_engine.scapy_send', side_effect=fake_send):
+        spoof_engine.send_spoofed_queries_through_resolvers(
+            domain='example.com', resolvers=['1.1.1.1', '8.8.8.8'],
+            resolver_port=53, victim_ip='1.2.3.4', num_queries=3,
+            interval=0, burst=True)
+    assert len(count) == 6
