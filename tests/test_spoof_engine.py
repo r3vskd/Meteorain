@@ -56,3 +56,15 @@ def test_resolver_loop_fires_all_threads():
             resolver_port=53, victim_ip='1.2.3.4', num_queries=3,
             interval=0, burst=True)
     assert len(count) == 6
+
+
+def test_burst_mode_skips_sleep():
+    import spoof_engine
+    sleeps = []
+    with patch('spoof_engine.scapy_send', return_value=None), \
+         patch('spoof_engine._time_sleep', side_effect=sleeps.append):
+        spoof_engine.send_spoofed_queries_through_resolvers(
+            domain='example.com', resolvers=['1.1.1.1'],
+            resolver_port=53, victim_ip='1.2.3.4',
+            num_queries=2, interval=0.01, burst=True)
+    assert len(sleeps) == 0
