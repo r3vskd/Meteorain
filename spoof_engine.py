@@ -84,3 +84,4 @@ def send_spoofed_queries_through_resolvers(domain, resolvers, resolver_port,
                 _time_sleep(interval)
     for t in threads:
         t.join()
+    threads.clear()
