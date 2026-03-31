@@ -70,6 +70,8 @@ def send_spoofed_queries_through_resolvers(domain, resolvers, resolver_port,
                                            id_random=False, verbose=False,
                                            measure=False, burst=False,
                                            qclass=1):
+    if not resolvers:
+        return
     threads = []
     for resolver in resolvers:
         for _ in range(num_queries):
