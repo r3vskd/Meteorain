@@ -1,4 +1,9 @@
-"""DNS amplification spoof engine -- Layer-3 IP spoofing via Scapy."""
+"""DNS amplification spoof engine -- Layer-3 IP spoofing via Scapy.
+
+WARNING: For authorized penetration testing only. Using this tool against
+systems without explicit written permission is illegal.
+Requires root/administrator privileges. Linux only for IP spoofing.
+"""
 
 import os
 import random as _random
