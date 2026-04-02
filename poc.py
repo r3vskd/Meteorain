@@ -204,13 +204,13 @@ def send_queries_through_resolvers(domain, resolvers, server_port, num_queries, 
 
 def display_banner():
     print('''
-█▀▄▀█ ▄███▄     ▄▄▄▄▀ ▄███▄   ████▄ █▄▄▄▄ ██   ▄█    ▄   
-█ █ █ █▀   ▀ ▀▀▀ █    █▀   ▀  █   █ █  ▄▀ █ █  ██     █  
-█ ▄ █ ██▄▄       █    ██▄▄    █   █ █▀▀▌  █▄▄█ ██ ██   █ 
-█   █ █▄   ▄▀   █     █▄   ▄▀ ▀████ █  █  █  █ ▐█ █ █  █ 
-   █  ▀███▀    ▀      ▀███▀           █      █  ▐ █  █ █ 
-  ▀                                  ▀      █     █   ██ 
-                                           ▀  Author: r3vskd
+â–ˆâ–€â–„â–€â–ˆ â–„â–ˆâ–ˆâ–ˆâ–„     â–„â–„â–„â–„â–€ â–„â–ˆâ–ˆâ–ˆâ–„   â–ˆâ–ˆâ–ˆâ–ˆâ–„ â–ˆâ–„â–„â–„â–„ â–ˆâ–ˆ   â–„â–ˆ    â–„   
+â–ˆ â–ˆ â–ˆ â–ˆâ–€   â–€ â–€â–€â–€ â–ˆ    â–ˆâ–€   â–€  â–ˆ   â–ˆ â–ˆ  â–„â–€ â–ˆ â–ˆ  â–ˆâ–ˆ     â–ˆ  
+â–ˆ â–„ â–ˆ â–ˆâ–ˆâ–„â–„       â–ˆ    â–ˆâ–ˆâ–„â–„    â–ˆ   â–ˆ â–ˆâ–€â–€â–Œ  â–ˆâ–„â–„â–ˆ â–ˆâ–ˆ â–ˆâ–ˆ   â–ˆ 
+â–ˆ   â–ˆ â–ˆâ–„   â–„â–€   â–ˆ     â–ˆâ–„   â–„â–€ â–€â–ˆâ–ˆâ–ˆâ–ˆ â–ˆ  â–ˆ  â–ˆ  â–ˆ â–â–ˆ â–ˆ â–ˆ  â–ˆ 
+   â–ˆ  â–€â–ˆâ–ˆâ–ˆâ–€    â–€      â–€â–ˆâ–ˆâ–ˆâ–€           â–ˆ      â–ˆ  â– â–ˆ  â–ˆ â–ˆ 
+  â–€                                  â–€      â–ˆ     â–ˆ   â–ˆâ–ˆ 
+                                           â–€  Author: r3vskd
                                               Warning: It was created for educational purposes. Please don't misuse it for illegal activities.         
 ''')
     print("Usage:")
@@ -257,6 +257,7 @@ if __name__ == "__main__":
     parser.add_argument('--print_query', action='store_true', help='Print query hex when verbose')
     parser.add_argument('--id_random', action='store_true', help='Randomize TXID per query')
     parser.add_argument('--burst', action='store_true', help='Start threads without delay')
+    parser.add_argument('--spoof', action='store_true', help='Enable IP spoofing mode (requires root)')
     parser.add_argument('--id_random', action='store_true', help='Randomize TXID per query')
 
     args = parser.parse_args()
