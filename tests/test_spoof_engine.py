@@ -68,3 +68,16 @@ def test_burst_mode_skips_sleep():
             resolver_port=53, victim_ip='1.2.3.4',
             num_queries=2, interval=0.01, burst=True)
     assert len(sleeps) == 0
+
+def test_edns_payload_sets_opt_rclass():
+    import spoof_engine
+    from scapy.layers.dns import DNSRROPT
+    captured = []
+    from unittest.mock import patch
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='1.2.3.4', edns_payload=4096)
+    pkt = captured[0]
+    assert pkt.haslayer(DNSRROPT)
+    assert pkt[DNSRROPT].rclass == 4096
