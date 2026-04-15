@@ -92,3 +92,14 @@ def test_dnssec_do_bit_set():
             domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
             victim_ip='1.2.3.4', edns_payload=512, dnssec_do=True)
     assert captured[0][DNSRROPT].z == 0x8000
+
+def test_qtype_any_maps_to_255():
+    import spoof_engine
+    from scapy.layers.dns import DNSQR
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='1.2.3.4', qtype='ANY', edns_payload=0)
+    assert captured[0][DNSQR].qtype == 255
