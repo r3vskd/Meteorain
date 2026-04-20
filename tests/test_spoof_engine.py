@@ -125,3 +125,10 @@ def test_unknown_qtype_defaults_to_a():
             domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
             victim_ip='1.2.3.4', qtype='BOGUS', edns_payload=0)
     assert captured[0][DNSQR].qtype == 1
+
+def test_check_root_error_message_mentions_root(monkeypatch):
+    import spoof_engine
+    monkeypatch.setattr(spoof_engine, '_is_root', lambda: False)
+    with pytest.raises(PermissionError) as exc_info:
+        spoof_engine.check_root()
+    assert 'root' in str(exc_info.value).lower()
