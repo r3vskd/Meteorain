@@ -132,3 +132,13 @@ def test_check_root_error_message_mentions_root(monkeypatch):
     with pytest.raises(PermissionError) as exc_info:
         spoof_engine.check_root()
     assert 'root' in str(exc_info.value).lower()
+
+def test_single_resolver_single_query():
+    import spoof_engine
+    from unittest.mock import patch
+    sent = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: sent.append(p)):
+        spoof_engine.send_spoofed_queries_through_resolvers(
+            domain='example.com', resolvers=['1.1.1.1'], resolver_port=53,
+            victim_ip='9.9.9.9', num_queries=1, burst=True)
+    assert len(sent) == 1
