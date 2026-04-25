@@ -80,7 +80,7 @@ def send_spoofed_queries_through_resolvers(domain, resolvers, resolver_port,
     if not resolvers:
         return
     threads = []
-    for resolver in resolvers:
+    for resolver in (r.strip() for r in resolvers if r.strip()):
         for _ in range(num_queries):
             t = _threading.Thread(
                 target=send_spoofed_dns_query,
