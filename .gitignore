@@ -8,4 +8,4 @@ build/
 .env
 run_march.ps1
 run_april.ps1
-run_may.ps1
+run_may.ps1run_commits.ps1
