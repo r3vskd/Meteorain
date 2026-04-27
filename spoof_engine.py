@@ -80,6 +80,8 @@ def send_spoofed_queries_through_resolvers(domain, resolvers, resolver_port,
     if not resolvers:
         return
     threads = []
+    total = len(resolvers) * num_queries
+    fired = 0
     for resolver in (r.strip() for r in resolvers if r.strip()):
         for _ in range(num_queries):
             t = _threading.Thread(
@@ -89,6 +91,9 @@ def send_spoofed_queries_through_resolvers(domain, resolvers, resolver_port,
                       txid, id_random, verbose, measure, qclass))
             threads.append(t)
             t.start()
+            fired += 1
+            if verbose:
+                print(f"[{fired}/{total}] Spoofing via {resolver}")
             if not burst:
                 _time_sleep(interval)
     for t in threads:
