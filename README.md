@@ -20,7 +20,7 @@ to overwhelm a target server or network with an amplified amount of traffic, ren
 
 ## Is possible to mitigate a DNS amplification attack?
 Yes, mitigation options are limited due to the high amount of traffic generated, the Internet Service Provider (ISP) or other upstream infrastructure providers may not
-be able to handle the incoming traffic without becoming overwhelmed. As a result, the ISP may blackhole all traffic to the targeted victimÃ¢â‚¬â„¢s IP address.
+be able to handle the incoming traffic without becoming overwhelmed. As a result, the ISP may blackhole all traffic to the targeted victimÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s IP address.
 
 ## References:
 - https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/
@@ -81,3 +81,11 @@ sudo tcpdump -n -i eth0 udp port 53
 ```
 
 You should see packets with `src=<victim_ip>` directed at each resolver.
+## Platform Requirements
+
+| Feature | Linux | Windows |
+|---------|-------|---------|
+| Standard DNS queries | Yes | Yes |
+| IP spoofing (--spoof) | Yes (root) | No (kernel blocks raw socket spoofing) |
+
+On Windows, Scapy requires [Npcap](https://npcap.com/) for raw packet operations.
