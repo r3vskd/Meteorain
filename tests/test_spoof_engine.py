@@ -164,3 +164,17 @@ def test_id_random_generates_varied_txids():
                 domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
                 victim_ip='1.2.3.4', edns_payload=0, id_random=True)
     assert len(set(ids)) > 1
+
+@pytest.mark.parametrize("qtype,expected", [
+    ('A', 1), ('AAAA', 28), ('TXT', 16), ('MX', 15), ('NS', 2),
+])
+def test_qtype_wire_values(qtype, expected):
+    import spoof_engine
+    from scapy.layers.dns import DNSQR
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='1.2.3.4', qtype=qtype, edns_payload=0)
+    assert captured[0][DNSQR].qtype == expected
