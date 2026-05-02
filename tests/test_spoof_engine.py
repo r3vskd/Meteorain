@@ -178,3 +178,15 @@ def test_qtype_wire_values(qtype, expected):
             domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
             victim_ip='1.2.3.4', qtype=qtype, edns_payload=0)
     assert captured[0][DNSQR].qtype == expected
+
+def test_domain_trailing_dot_stripped():
+    import spoof_engine
+    from scapy.layers.dns import DNSQR
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com.', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='1.2.3.4', edns_payload=0)
+    qname = captured[0][DNSQR].qname
+    assert not qname.endswith(b'..')
