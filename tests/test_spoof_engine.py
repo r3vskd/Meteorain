@@ -190,3 +190,15 @@ def test_domain_trailing_dot_stripped():
             victim_ip='1.2.3.4', edns_payload=0)
     qname = captured[0][DNSQR].qname
     assert not qname.endswith(b'..')
+
+
+def test_no_edns_has_no_opt_record():
+    import spoof_engine
+    from scapy.layers.dns import DNSRROPT
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='1.2.3.4', edns_payload=0)
+    assert not captured[0].haslayer(DNSRROPT)
