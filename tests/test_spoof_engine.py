@@ -202,3 +202,15 @@ def test_no_edns_has_no_opt_record():
             domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
             victim_ip='1.2.3.4', edns_payload=0)
     assert not captured[0].haslayer(DNSRROPT)
+
+
+def test_resolver_port_used_as_udp_dport():
+    import spoof_engine
+    from scapy.layers.inet import UDP
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=5353,
+            victim_ip='1.2.3.4', edns_payload=0)
+    assert captured[0][UDP].dport == 5353
