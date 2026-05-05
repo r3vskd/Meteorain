@@ -214,3 +214,15 @@ def test_resolver_port_used_as_udp_dport():
             domain='example.com', resolver_ip='8.8.8.8', resolver_port=5353,
             victim_ip='1.2.3.4', edns_payload=0)
     assert captured[0][UDP].dport == 5353
+
+
+def test_victim_src_port_used_as_udp_sport():
+    import spoof_engine
+    from scapy.layers.inet import UDP
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='1.2.3.4', victim_src_port=9999, edns_payload=0)
+    assert captured[0][UDP].sport == 9999
