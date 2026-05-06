@@ -15,7 +15,7 @@ from scapy.all import send as scapy_send
 from scapy.layers.dns import DNS, DNSQR, DNSRROPT
 from scapy.layers.inet import IP, UDP
 
-DEFAULT_VICTIM_PORT = 53
+DEFAULT_VICTIM_PORT = 53  # RFC 1035 standard DNS port
 
 QTYPE_MAP = {
     'A': 1, 'AAAA': 28, 'ANY': 255, 'DNSKEY': 48, 'DS': 43,
