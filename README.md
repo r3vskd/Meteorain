@@ -20,7 +20,7 @@ to overwhelm a target server or network with an amplified amount of traffic, ren
 
 ## Is possible to mitigate a DNS amplification attack?
 Yes, mitigation options are limited due to the high amount of traffic generated, the Internet Service Provider (ISP) or other upstream infrastructure providers may not
-be able to handle the incoming traffic without becoming overwhelmed. As a result, the ISP may blackhole all traffic to the targeted victimÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s IP address.
+be able to handle the incoming traffic without becoming overwhelmed. As a result, the ISP may blackhole all traffic to the targeted victimÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s IP address.
 
 ## References:
 - https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/
@@ -89,3 +89,10 @@ You should see packets with `src=<victim_ip>` directed at each resolver.
 | IP spoofing (--spoof) | Yes (root) | No (kernel blocks raw socket spoofing) |
 
 On Windows, Scapy requires [Npcap](https://npcap.com/) for raw packet operations.
+
+## Amplification Factor
+
+The amplification ratio measures how much larger the DNS response is compared to the query.
+Use `--measure` to print the ratio for each resolver.
+
+Typical ratios: ANY=50-70x, DNSKEY=30-50x, TXT=10-20x.
