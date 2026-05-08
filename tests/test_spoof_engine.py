@@ -226,3 +226,16 @@ def test_victim_src_port_used_as_udp_sport():
             domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
             victim_ip='1.2.3.4', victim_src_port=9999, edns_payload=0)
     assert captured[0][UDP].sport == 9999
+
+
+def test_fixed_txid_is_consistent():
+    import spoof_engine
+    from scapy.layers.dns import DNS
+    from unittest.mock import patch
+    ids = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: ids.append(p[DNS].id)):
+        for _ in range(5):
+            spoof_engine.send_spoofed_dns_query(
+                domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+                victim_ip='1.2.3.4', edns_payload=0, txid=0xABCD, id_random=False)
+    assert all(i == 0xABCD for i in ids)
