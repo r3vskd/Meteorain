@@ -251,3 +251,14 @@ def test_qclass_default_is_in():
             domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
             victim_ip='1.2.3.4', edns_payload=0)
     assert captured[0][DNSQR].qclass == 1
+
+
+def test_multiple_resolvers_send_count():
+    import spoof_engine
+    from unittest.mock import patch
+    sent = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: sent.append(p)):
+        spoof_engine.send_spoofed_queries_through_resolvers(
+            domain='example.com', resolvers=['1.1.1.1', '8.8.8.8', '9.9.9.9'],
+            resolver_port=53, victim_ip='1.2.3.4', num_queries=1, burst=True)
+    assert len(sent) == 3
