@@ -20,7 +20,7 @@ to overwhelm a target server or network with an amplified amount of traffic, ren
 
 ## Is possible to mitigate a DNS amplification attack?
 Yes, mitigation options are limited due to the high amount of traffic generated, the Internet Service Provider (ISP) or other upstream infrastructure providers may not
-be able to handle the incoming traffic without becoming overwhelmed. As a result, the ISP may blackhole all traffic to the targeted victimÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢s IP address.
+be able to handle the incoming traffic without becoming overwhelmed. As a result, the ISP may blackhole all traffic to the targeted victimÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢s IP address.
 
 ## References:
 - https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/
@@ -96,3 +96,12 @@ The amplification ratio measures how much larger the DNS response is compared to
 Use `--measure` to print the ratio for each resolver.
 
 Typical ratios: ANY=50-70x, DNSKEY=30-50x, TXT=10-20x.
+
+
+## Contributing
+
+1. Fork the repo
+2. Create a feature branch
+3. Add tests for any new functionality
+4. Run `pytest tests/` to verify
+5. Submit a pull request
