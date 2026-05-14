@@ -262,3 +262,16 @@ def test_multiple_resolvers_send_count():
             domain='example.com', resolvers=['1.1.1.1', '8.8.8.8', '9.9.9.9'],
             resolver_port=53, victim_ip='1.2.3.4', num_queries=1, burst=True)
     assert len(sent) == 3
+
+
+def test_non_burst_mode_calls_sleep():
+    import spoof_engine
+    from unittest.mock import patch
+    sleeps = []
+    with patch('spoof_engine.scapy_send', return_value=None), `n         patch('spoof_engine._time_sleep', side_effect=sleeps.append):
+        spoof_engine.send_spoofed_queries_through_resolvers(
+            domain='example.com', resolvers=['1.1.1.1', '8.8.8.8'],
+            resolver_port=53, victim_ip='1.2.3.4',
+            num_queries=1, interval=0.01, burst=False)
+    assert len(sleeps) == 2
+    assert all(s == 0.01 for s in sleeps)
