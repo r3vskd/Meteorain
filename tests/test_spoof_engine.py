@@ -275,3 +275,10 @@ def test_non_burst_mode_calls_sleep():
             num_queries=1, interval=0.01, burst=False)
     assert len(sleeps) == 2
     assert all(s == 0.01 for s in sleeps)
+
+
+def test_make_txid_returns_int():
+    import spoof_engine
+    result = spoof_engine._make_txid(0x1234, False)
+    assert result == 0x1234
+    assert isinstance(result, int)
