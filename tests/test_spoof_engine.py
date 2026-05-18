@@ -282,3 +282,10 @@ def test_make_txid_returns_int():
     result = spoof_engine._make_txid(0x1234, False)
     assert result == 0x1234
     assert isinstance(result, int)
+
+
+def test_make_txid_random_is_valid_range():
+    import spoof_engine
+    for _ in range(50):
+        val = spoof_engine._make_txid(0x1234, True)
+        assert 0 <= val <= 0xFFFF
