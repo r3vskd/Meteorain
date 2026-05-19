@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 r3vskd
+# Version: 2.0.0
 """DNS amplification spoof engine -- Layer-3 IP spoofing via Scapy.
 
 WARNING: For authorized penetration testing only. Using this tool against
