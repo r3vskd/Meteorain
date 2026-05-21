@@ -289,3 +289,9 @@ def test_make_txid_random_is_valid_range():
     for _ in range(50):
         val = spoof_engine._make_txid(0x1234, True)
         assert 0 <= val <= 0xFFFF
+
+
+def test_is_root_returns_bool():
+    import spoof_engine
+    result = spoof_engine._is_root()
+    assert isinstance(result, bool)
