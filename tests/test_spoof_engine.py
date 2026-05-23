@@ -295,3 +295,15 @@ def test_is_root_returns_bool():
     import spoof_engine
     result = spoof_engine._is_root()
     assert isinstance(result, bool)
+
+
+def test_qtype_case_insensitive():
+    import spoof_engine
+    from scapy.layers.dns import DNSQR
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='1.2.3.4', qtype='any', edns_payload=0)
+    assert captured[0][DNSQR].qtype == 255
