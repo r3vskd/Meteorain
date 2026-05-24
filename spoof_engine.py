@@ -31,7 +31,7 @@ def _make_txid(txid, id_random):
     return _random.randint(0, 0xFFFF) if id_random else txid
 
 
-def _time_sleep(s):
+def _time_sleep(s):  # thin wrapper to allow patching in tests
     _time_module.sleep(s)
 
 
