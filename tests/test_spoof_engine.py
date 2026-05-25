@@ -307,3 +307,15 @@ def test_qtype_case_insensitive():
             domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
             victim_ip='1.2.3.4', qtype='any', edns_payload=0)
     assert captured[0][DNSQR].qtype == 255
+
+
+def test_send_spoofed_dns_query_resolver_ip_is_dst():
+    import spoof_engine
+    from scapy.layers.inet import IP
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='4.4.4.4', resolver_port=53,
+            victim_ip='1.2.3.4', edns_payload=0)
+    assert captured[0][IP].dst == '4.4.4.4'
