@@ -319,3 +319,15 @@ def test_send_spoofed_dns_query_resolver_ip_is_dst():
             domain='example.com', resolver_ip='4.4.4.4', resolver_port=53,
             victim_ip='1.2.3.4', edns_payload=0)
     assert captured[0][IP].dst == '4.4.4.4'
+
+
+def test_num_queries_multiplies_sends():
+    import spoof_engine
+    from unittest.mock import patch
+    sent = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: sent.append(p)):
+        spoof_engine.send_spoofed_queries_through_resolvers(
+            domain='example.com', resolvers=['1.1.1.1'],
+            resolver_port=53, victim_ip='1.2.3.4',
+            num_queries=5, burst=True)
+    assert len(sent) == 5
