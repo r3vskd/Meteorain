@@ -331,3 +331,15 @@ def test_num_queries_multiplies_sends():
             resolver_port=53, victim_ip='1.2.3.4',
             num_queries=5, burst=True)
     assert len(sent) == 5
+
+
+def test_dnssec_do_false_sets_z_zero():
+    import spoof_engine
+    from scapy.layers.dns import DNSRROPT
+    from unittest.mock import patch
+    captured = []
+    with patch('spoof_engine.scapy_send', side_effect=lambda p, verbose: captured.append(p)):
+        spoof_engine.send_spoofed_dns_query(
+            domain='example.com', resolver_ip='8.8.8.8', resolver_port=53,
+            victim_ip='1.2.3.4', edns_payload=512, dnssec_do=False)
+    assert captured[0][DNSRROPT].z == 0
